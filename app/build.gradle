@@ -1,11 +1,12 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 27
+    compileSdkVersion COMPILE_SDK_VERSION as int
+    buildToolsVersion BUILD_TOOLS_VERSION as String
     defaultConfig {
         applicationId "co.fitcom.downloader"
         minSdkVersion 17
-        targetSdkVersion 27
+        targetSdkVersion COMPILE_SDK_VERSION as int
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -17,6 +18,7 @@ android {
         }
     }
 }
+
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
