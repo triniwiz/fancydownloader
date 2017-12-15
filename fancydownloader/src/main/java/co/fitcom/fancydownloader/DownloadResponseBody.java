@@ -75,39 +75,29 @@ public class DownloadResponseBody extends ResponseBody {
             String task = tag.toString();
             long length = contentLength();
             long skippedLength = length += skipBytes;
-            @Override public long read(Buffer sink, long byteCount) throws IOException {
+            @Override public long read(@NonNull Buffer sink, long byteCount) throws IOException {
                 long bytesRead = super.read(sink, byteCount);
-                totalBytesRead += bytesRead != -1 ? bytesRead : 0;
+                if(listener != null) {
+                    totalBytesRead += bytesRead != -1 ? bytesRead : 0;
 
-                if (length < 0) {
-                    listener.onProgress(task, -1, -1);
-                }
-                if (bytesRead >= 0) {
-                    if (skipBytes > 0) {
-                        skippedBytes = (skipBytes + totalBytesRead);
-                        listener.onProgress(task, skippedBytes, skippedLength);
-                    } else {
-                        listener.onProgress(task, totalBytesRead, length);
+                    if (length < 0) {
+                        listener.onProgress(task, -1, -1);
+                    }
+                    if (bytesRead >= 0) {
+                        if (skipBytes > 0) {
+                            skippedBytes = (skipBytes + totalBytesRead);
+                            listener.onProgress(task, skippedBytes, skippedLength);
+                        } else {
+                            listener.onProgress(task, totalBytesRead, length);
+                        }
+                    }
+                    if (bytesRead == -1) {
+                        listener.onComplete(task);
                     }
                 }
-                if (bytesRead == -1) {
-                    listener.onComplete(task);
-                }
-
                 return bytesRead;
             }
         };
     }
 
-
-//    @Override
-//    public void close() {
-//        if (bufferedSource != null) {
-//            try {
-//                bufferedSource.close();
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//        }
-//    }
 }

@@ -4,10 +4,10 @@ package co.fitcom.fancydownloader;
  * Created by triniwiz on 12/13/17.
  */
 
-public abstract  class DownloadListener implements DownloadCallback {
+public abstract class DownloadListener implements DownloadCallback {
     private long lastRefreshTime = 0;
     private long lastBytesWritten = 0;
-    public abstract  void onProgress(String task, long currentBytes, long totalBytes,long speed);
+    public abstract void onProgress(String task, long currentBytes, long totalBytes,long speed);
     void onProgress(String task, long currentBytes, long totalBytes) {
         float percent = (currentBytes * 1.0F) / totalBytes;
         long currentTime = System.currentTimeMillis();
@@ -26,6 +26,6 @@ public abstract  class DownloadListener implements DownloadCallback {
 
     }
 
-    public abstract void onComplete(String task);
-    public abstract void onError(String task, Exception e);
+   public void onComplete(String task){}
+   public void onError(String task, Exception e){};
 }

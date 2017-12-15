@@ -46,9 +46,10 @@ public class Manager {
         return mManager;
     }
 
-    public void cleanUp(){
+    public void cleanUp() {
         mService.cleanUp();
     }
+
     public String create(Request request) {
         return mService.create(request);
     }
@@ -60,9 +61,11 @@ public class Manager {
     public void cancel(String id) {
         mService.cancel(id);
     }
-    public void cancelAll(){
+
+    public void cancelAll() {
         mService.cancelAll();
     }
+
     public void resume(String id) {
         mService.resume(id);
     }
@@ -70,9 +73,11 @@ public class Manager {
     public void pause(String id) {
         mService.pause(id);
     }
-    public void pauseAll(){
+
+    public void pauseAll() {
         mService.pauseAll();
     }
+
     private void createConnection() {
         mConnection = new ServiceConnection() {
             @Override

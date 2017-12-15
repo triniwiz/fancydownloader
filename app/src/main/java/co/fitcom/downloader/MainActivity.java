@@ -43,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
         final Request request = new Request(LARGE_IMAGE);
 
         request.setListener(new DownloadListener() {
+            @Override
             public void onComplete(String task) {
                 String path = request.getFilePath().concat("/");
                 final String imagePath = path.concat(request.getFileName());
@@ -54,10 +55,11 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
             }
-
+            @Override
             public void onError(String task, Exception exception) {
             }
 
+            @Override
             public void onProgress(String task, final long currentBytes, final long totalBytes,long speed) {
                 runOnUiThread(new Runnable() {
                     @Override
@@ -74,14 +76,15 @@ public class MainActivity extends AppCompatActivity {
 
         Request fileRequest = new Request("http://ipv4.download.thinkbroadband.com/20MB.zip");
         fileRequest.setListener(new DownloadListener() {
+            @Override
             public void onComplete(String task) {
 
 
             }
-
+            @Override
             public void onError(String task, Exception exception) {
             }
-
+            @Override
             public void onProgress(String task, final long currentBytes, final long totalBytes,long speed) {
                 runOnUiThread(new Runnable() {
                     @Override

@@ -36,27 +36,27 @@ public abstract class DownloadListenerUI extends DownloadListener {
                         switch (msg.what) {
                             case WHAT_ERROR:
                                 Bundle errorData = msg.getData();
-                                if(errorData == null){
+                                if (errorData == null) {
                                     return;
                                 }
                                 task = errorData.getString(TASK);
-                                Exception exception =  (Exception) errorData.getSerializable(EXCEPTION);
+                                Exception exception = (Exception) errorData.getSerializable(EXCEPTION);
                                 onUIError(task, exception);
                                 break;
                             case WHAT_PROGRESS:
                                 Bundle progressData = msg.getData();
-                                if(progressData == null){
+                                if (progressData == null) {
                                     return;
                                 }
                                 task = progressData.getString(TASK);
                                 long currentByes = progressData.getLong(CURRENT_BYTES);
                                 long totalByes = progressData.getLong(TOTAL_BYTES);
                                 long speed = progressData.getLong(SPEED);
-                                onUIProgress(task,currentByes,totalByes,speed);
+                                onUIProgress(task, currentByes, totalByes, speed);
                                 break;
                             case WHAT_FINISH:
                                 Bundle finishData = msg.getData();
-                                if(finishData == null){
+                                if (finishData == null) {
                                     return;
                                 }
                                 task = finishData.getString(TASK);
@@ -69,8 +69,7 @@ public abstract class DownloadListenerUI extends DownloadListener {
         }
     }
 
-
-    public void onProgress(String task, long currentBytes, long totalBytes, long speed) {
+    public final void onProgress(String task, long currentBytes, long totalBytes, long speed) {
         if (Looper.myLooper() == Looper.getMainLooper()) {
             onUIProgress(task, currentBytes, totalBytes, speed);
             return;
@@ -87,7 +86,7 @@ public abstract class DownloadListenerUI extends DownloadListener {
         handler.sendMessage(message);
     }
 
-    public void onComplete(String task) {
+    public final void onComplete(String task) {
         if (Looper.myLooper() == Looper.getMainLooper()) {
             onUIComplete(task);
             return;
@@ -101,9 +100,9 @@ public abstract class DownloadListenerUI extends DownloadListener {
         handler.sendMessage(message);
     }
 
-    public void onError(String task, Exception e) {
+    public final void onError(String task, Exception e) {
         if (Looper.myLooper() == Looper.getMainLooper()) {
-            onUIError(task,e);
+            onUIError(task, e);
             return;
         }
         ensureHandler();
@@ -111,15 +110,15 @@ public abstract class DownloadListenerUI extends DownloadListener {
         message.what = WHAT_ERROR;
         Bundle bundle = new Bundle();
         bundle.putString(TASK, task);
-        bundle.putSerializable(EXCEPTION,e);
+        bundle.putSerializable(EXCEPTION, e);
         message.setData(bundle);
         handler.sendMessage(message);
     }
 
-    abstract void onUIProgress(String task, long currentBytes, long totalBytes, long speed);
+    public abstract void onUIProgress(String task, long currentBytes, long totalBytes, long speed);
 
-    abstract void onUIComplete(String task);
+    public abstract void onUIComplete(String task);
 
-    abstract void onUIError(String task, Exception e);
+    public abstract void onUIError(String task, Exception e);
 
 }

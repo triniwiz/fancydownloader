@@ -17,15 +17,15 @@ public class Task {
         mCall = call;
     }
 
-    okhttp3.Request getOkRequest() {
+    public okhttp3.Request getOkRequest() {
         return mOkRequest;
     }
 
-    void setOkRequest(okhttp3.Request request){
+    public void setOkRequest(okhttp3.Request request){
         this.mOkRequest = request;
     }
 
-    Request getDownloaderRequest() {
+    public Request getDownloaderRequest() {
         return mDownloaderRequest;
     }
 
@@ -33,11 +33,11 @@ public class Task {
         this.mDownloaderRequest = request;
     }
 
-    Call getCall() {
+    public Call getCall() {
         return this.mCall;
     }
 
-    void setCall(Call call){
+    public void setCall(Call call){
         this.mCall = call;
     }
 

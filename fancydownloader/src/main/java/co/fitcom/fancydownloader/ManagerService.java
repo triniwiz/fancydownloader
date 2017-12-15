@@ -19,6 +19,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
 import okhttp3.*;
+
 import okio.BufferedSink;
 import okio.BufferedSource;
 import okio.Okio;
@@ -34,13 +35,13 @@ public class ManagerService extends Service {
     private OkHttpClient client = new OkHttpClient();
     private Handler mHandler;
     private HandlerThread mThread;
+
     class ManagerBinder extends Binder {
         ManagerService getService() {
             return ManagerService.this;
         }
     }
 
-    /*
     @Override
     public void onCreate() {
         super.onCreate();
@@ -48,7 +49,6 @@ public class ManagerService extends Service {
         mThread.start();
         mHandler = new Handler(mThread.getLooper());
     }
-    */
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -90,76 +90,83 @@ public class ManagerService extends Service {
 
     public void start(final String id) {
         final Task task = tasks.get(id);
-        if(task != null){
-            final Request request = task.getDownloaderRequest();
-            final Call call = task.getCall();
-            call.enqueue(new Callback() {
+        if (task != null) {
+            mHandler.post(new Runnable() {
                 @Override
-                public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                    if (!call.isCanceled()) {
-                        handleIOException(request.getListener(),call.request().tag().toString(),e);
-                    }
-                }
+                public void run() {
+                    final Request request = task.getDownloaderRequest();
+                    final Call call = task.getCall();
+                    call.enqueue(new Callback() {
+                        @Override
+                        public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                            if (!call.isCanceled()) {
+                                handleIOException(request.getListener(), call.request().tag().toString(), e);
+                            }
+                        }
 
-                @Override
-                public void onResponse(@NonNull Call call, @NonNull final Response response) {
-                    ResponseBody responseBody = new DownloadResponseBody(id, response.headers(), response.body(), request.getListener());
-                    BufferedSource bufferedSource = responseBody.source();
-                    File file = new File(request.getFilePath(), request.getFileName());
-                    BufferedSink sink = null;
-                    DownloadListener listener = request.getListener();
-                    String taskId = call.request().tag().toString();
-                    try {
-                        sink = Okio.buffer(Okio.sink(file));
-                        sink.writeAll(Okio.source(bufferedSource.inputStream()));
-                    } catch (FileNotFoundException e) {
-                        handleIOException(listener,taskId,e);
-                    } catch (IOException e) {
-                        handleIOException(listener,taskId,e);
-                    } finally {
-                        if(sink != null){
+                        @Override
+                        public void onResponse(@NonNull Call call, @NonNull final Response response) {
+                            ResponseBody responseBody = new DownloadResponseBody(id, response.headers(), response.body(), request.getListener());
+                            BufferedSource bufferedSource = responseBody.source();
+                            File file = new File(request.getFilePath(), request.getFileName());
+                            BufferedSink sink = null;
+                            DownloadListener listener = request.getListener();
+                            System.out.println(listener);
+                            String taskId = call.request().tag().toString();
                             try {
-                                sink.close();
+                                sink = Okio.buffer(Okio.sink(file));
+                                sink.writeAll(Okio.source(bufferedSource.inputStream()));
+                            } catch (FileNotFoundException e) {
+                                handleIOException(listener, taskId, e);
                             } catch (IOException e) {
-                                handleIOException(listener,taskId,e);
+                                handleIOException(listener, taskId, e);
+                            } finally {
+                                if (sink != null) {
+                                    try {
+                                        sink.close();
+                                    } catch (IOException e) {
+                                        handleIOException(listener, taskId, e);
+                                    }
+                                }
+                                if (bufferedSource != null) {
+                                    try {
+                                        bufferedSource.close();
+                                    } catch (IOException e) {
+                                        handleIOException(listener, taskId, e);
+                                    }
+                                }
+                                responseBody.close();
                             }
                         }
-                        if (bufferedSource != null) {
-                            try {
-                                bufferedSource.close();
-                            } catch (IOException e) {
-                                handleIOException(listener,taskId,e);
-                            }
-                        }
-                        responseBody.close();
-                    }
+                    });
                 }
             });
         }
     }
 
-    private void handleIOException(DownloadListener listener,String taskId,Exception e) {
+    private void handleIOException(DownloadListener listener, String taskId, Exception e) {
         // Ignore when cancel is called;
         if (e.getLocalizedMessage() != null) {
             if (!e.getLocalizedMessage().contains("Socket closed") || !e.getLocalizedMessage().contains("CANCEL")) {
-                if(listener != null){
-                    listener.onError(taskId,new Exception(e.getMessage(),e.getCause()));
+                if (listener != null) {
+                    listener.onError(taskId, new Exception(e.getMessage(), e.getCause()));
                 }
             }
         }
     }
-    public void cleanUp(){
+
+    public void cleanUp() {
         cancelAll();
         stopSelf();
     }
 
-    private void cancel(String id, Boolean delete){
+    private void cancel(String id, Boolean delete) {
         Task task = tasks.get(id);
         if (task != null) {
-            if(task.getCall().isExecuted()){
+            if (task.getCall().isExecuted()) {
                 task.getCall().cancel();
             }
-            if(delete){
+            if (delete) {
                 tasks.remove(id);
             }
         } else {
@@ -171,73 +178,83 @@ public class ManagerService extends Service {
             }
         }
     }
+
     public void cancel(String id) {
-        cancel(id,true);
+        cancel(id, true);
     }
-    public void cancelAll(){
+
+    public void cancelAll() {
         client.dispatcher().cancelAll();
-        for(String key: tasks.keySet()){
+        for (String key : tasks.keySet()) {
             tasks.remove(key);
         }
     }
+
     public void pause(String id) {
-        cancel(id,false);
+        cancel(id, false);
     }
-    public void pauseAll(){
-        if(client != null){
+
+    public void pauseAll() {
+        if (client != null) {
             client.dispatcher().cancelAll();
         }
     }
+
     public void resume(final String id) {
         final Task task = tasks.get(id);
-        if(task != null){
-            final Request request = task.getDownloaderRequest();
-            final File file = new File(request.getFilePath(), request.getFileName());
-            okhttp3.Request okRequest = task.getOkRequest().newBuilder()
-                    .header("Range", "bytes=" + file.length() + "-")
-                    .build();
-            task.setOkRequest(okRequest);
-            final Call call = client.newCall(okRequest);
-            task.setCall(call);
-            tasks.put(id, new Task(okRequest, request, call));
-            call.enqueue(new Callback() {
+        if (task != null) {
+            mHandler.post(new Runnable() {
                 @Override
-                public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                    if(!call.isCanceled()){
-                        handleIOException(request.getListener(),id,e);
-                    }
-                }
-
-                @Override
-                public void onResponse(@NonNull Call call, @NonNull final Response response) {
-                    ResponseBody responseBody = new DownloadResponseBody(id, response.headers(), response.body(), request.getListener());
-                    BufferedSource bufferedSource = responseBody.source();
-                    BufferedSink sink = null;
-                    try {
-                        sink = Okio.buffer(Okio.appendingSink(file));
-                        sink.writeAll(Okio.source(responseBody.byteStream()));
-                    } catch (FileNotFoundException e) {
-                        handleIOException(request.getListener(),id,e);
-                    } catch (IOException e) {
-                        handleIOException(request.getListener(),id,e);
-                    } finally {
-
-                        if(sink != null){
-                            try {
-                                sink.close();
-                            } catch (IOException e) {
-                                handleIOException(request.getListener(),id,e);
+                public void run() {
+                    final Request request = task.getDownloaderRequest();
+                    final File file = new File(request.getFilePath(), request.getFileName());
+                    okhttp3.Request okRequest = task.getOkRequest().newBuilder()
+                            .header("Range", "bytes=" + file.length() + "-")
+                            .build();
+                    task.setOkRequest(okRequest);
+                    final Call call = client.newCall(okRequest);
+                    task.setCall(call);
+                    tasks.put(id, new Task(okRequest, request, call));
+                    call.enqueue(new Callback() {
+                        @Override
+                        public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                            if (!call.isCanceled()) {
+                                handleIOException(request.getListener(), id, e);
                             }
                         }
-                        if (bufferedSource != null) {
+
+                        @Override
+                        public void onResponse(@NonNull Call call, @NonNull final Response response) {
+                            ResponseBody responseBody = new DownloadResponseBody(id, response.headers(), response.body(), request.getListener());
+                            BufferedSource bufferedSource = responseBody.source();
+                            BufferedSink sink = null;
                             try {
-                                bufferedSource.close();
+                                sink = Okio.buffer(Okio.appendingSink(file));
+                                sink.writeAll(Okio.source(responseBody.byteStream()));
+                            } catch (FileNotFoundException e) {
+                                handleIOException(request.getListener(), id, e);
                             } catch (IOException e) {
-                                handleIOException(request.getListener(),id,e);
+                                handleIOException(request.getListener(), id, e);
+                            } finally {
+
+                                if (sink != null) {
+                                    try {
+                                        sink.close();
+                                    } catch (IOException e) {
+                                        handleIOException(request.getListener(), id, e);
+                                    }
+                                }
+                                if (bufferedSource != null) {
+                                    try {
+                                        bufferedSource.close();
+                                    } catch (IOException e) {
+                                        handleIOException(request.getListener(), id, e);
+                                    }
+                                }
+                                responseBody.close();
                             }
                         }
-                        responseBody.close();
-                    }
+                    });
                 }
             });
         }
