@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 
+import java.util.Map;
+
 import okhttp3.OkHttpClient;
 
 /**
@@ -22,14 +24,12 @@ public class Manager {
     private static Manager mManager;
     private static ManagerService mService;
     private ServiceConnection mConnection;
-
     private Manager(Context context) {
         if (context == null) {
             throw new IllegalArgumentException("The provided context must not be null!");
         }
         this.createConnection();
         Intent intent = new Intent(context, ManagerService.class);
-        context.startService(intent);
         context.bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
     }
 

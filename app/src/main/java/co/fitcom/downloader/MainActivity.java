@@ -28,11 +28,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Manager.init(this);
-        downloadManager = Manager.getInstance();
     }
 
 
     public void generateDownloads(android.view.View view) {
+        downloadManager = Manager.getInstance();
         final ImageView imageView = (ImageView) findViewById(R.id.image);
         final ProgressBar imageProgressBar = (ProgressBar) findViewById(R.id.imageProgress);
         imageProgressBar.setMax(100);

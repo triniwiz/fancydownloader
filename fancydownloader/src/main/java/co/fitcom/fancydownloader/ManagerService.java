@@ -45,6 +45,7 @@ public class ManagerService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        this.tasks = new HashMap<>();
         mThread = new HandlerThread("Fancy Downloader", android.os.Process.THREAD_PRIORITY_BACKGROUND);
         mThread.start();
         mHandler = new Handler(mThread.getLooper());
@@ -52,7 +53,6 @@ public class ManagerService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        this.tasks = new HashMap<>();
         return START_STICKY;
     }
 
@@ -111,7 +111,6 @@ public class ManagerService extends Service {
                             File file = new File(request.getFilePath(), request.getFileName());
                             BufferedSink sink = null;
                             DownloadListener listener = request.getListener();
-                            System.out.println(listener);
                             String taskId = call.request().tag().toString();
                             try {
                                 sink = Okio.buffer(Okio.sink(file));
