@@ -1,4 +1,12 @@
-# NativeScript Downloader
+# FancyDownloader
+
+[![Download][bintray_svg]][bintray_url]
+![][file_downloader_svg]
+
+[build_status_svg]: https://travis-ci.org/triniwiz/fancydownloader.svg?branch=master
+[build_status_link]: https://travis-ci.org/triniwiz/fancydownloader
+[bintray_svg]: https://api.bintray.com/packages/triniwiz/maven/dancydownloader/images/download.svg
+[bintray_url]: https://bintray.com/triniwiz/maven/fancydownloader/_latestVersion
 
 ## Installation
 
