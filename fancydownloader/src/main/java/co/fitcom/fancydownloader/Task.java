@@ -1,10 +1,12 @@
+/*
+ * Created By Osei Fortune on 15/17/17 3:30 AM
+ * Copyright (c) 2017 - 2018
+ * Last modified 12/15/17 3:30 AM
+ */
+
 package co.fitcom.fancydownloader;
 
 import okhttp3.Call;
-
-/**
- * Created by triniwiz on 12/12/17.
- */
 
 public class Task {
     private okhttp3.Request mOkRequest;

@@ -1,15 +1,15 @@
+/*
+ * Created By Osei Fortune on 15/17/17 3:30 AM
+ * Copyright (c) 2017 - 2018
+ * Last modified 12/15/17 3:30 AM
+ */
+
 package co.fitcom.fancydownloader;
 
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-
-import java.io.Serializable;
-
-/**
- * Created by triniwiz on 12/13/17.
- */
 
 public abstract class DownloadListenerUI extends DownloadListener {
     private Handler handler;

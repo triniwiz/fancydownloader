@@ -1,13 +1,14 @@
+
+/*
+ * Created By Osei Fortune on 15/17/17 3:30 AM
+ * Copyright (c) 2017 - 2018
+ * Last modified 2/28/18 2:23 PM
+ */
+
 package co.fitcom.fancydownloader;
 
 import android.support.annotation.NonNull;
-
-import java.io.BufferedInputStream;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.Map;
-
 import okhttp3.Headers;
 import okhttp3.MediaType;
 import okhttp3.ResponseBody;
@@ -17,9 +18,8 @@ import okio.ForwardingSource;
 import okio.Okio;
 import okio.Source;
 
-/**
- * Created by triniwiz on 12/12/17.
- */
+
+
 
 public class DownloadResponseBody extends ResponseBody {
     private final ResponseBody responseBody;
@@ -91,9 +91,9 @@ public class DownloadResponseBody extends ResponseBody {
                             listener.onProgress(task, totalBytesRead, length);
                         }
                     }
-                    if (bytesRead == -1) {
-                        listener.onComplete(task);
-                    }
+//                    if (bytesRead == -1) {
+//                        listener.onComplete(task);
+//                    }
                 }
                 return bytesRead;
             }

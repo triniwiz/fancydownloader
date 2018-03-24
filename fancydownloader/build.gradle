@@ -1,9 +1,9 @@
 apply plugin: 'com.android.library'
-
+apply plugin: 'com.novoda.bintray-release'
 ext {
     PUBLISH_GROUP_ID = 'co.fitcom'
     PUBLISH_ARTIFACT_ID = 'fancydownloader'
-    PUBLISH_VERSION = '0.0.4'
+    PUBLISH_VERSION = '0.0.5'
 }
 
 android {
@@ -44,4 +44,13 @@ dependencies {
 boolean upload2maven = project.rootProject.hasProperty("for.upload") ? project.rootProject.property("for.upload") : "false"
 if (upload2maven) {
     apply from: 'android-release-aar.gradle'
+}
+
+publish {
+    userOrg = 'triniwiz'
+    groupId = 'co.fitcom'
+    artifactId = 'fancydownloader'
+    publishVersion = '0.5.0'
+    desc = ''
+    website = ''
 }

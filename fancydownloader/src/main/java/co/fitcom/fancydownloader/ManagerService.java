@@ -1,3 +1,9 @@
+/*
+ * Created By Osei Fortune on 15/17/17 3:30 AM
+ * Copyright (c) 2017 - 2018
+ * Last modified 2/28/18 12:16 PM
+ */
+
 package co.fitcom.fancydownloader;
 
 import android.app.Service;
@@ -23,10 +29,6 @@ import okhttp3.*;
 import okio.BufferedSink;
 import okio.BufferedSource;
 import okio.Okio;
-
-/**
- * Created by triniwiz on 12/12/17.
- */
 
 public class ManagerService extends Service {
     private Map<String, Task> tasks;
@@ -108,13 +110,24 @@ public class ManagerService extends Service {
                         public void onResponse(@NonNull Call call, @NonNull final Response response) {
                             ResponseBody responseBody = new DownloadResponseBody(id, response.headers(), response.body(), request.getListener());
                             BufferedSource bufferedSource = responseBody.source();
-                            File file = new File(request.getFilePath(), request.getFileName());
+                            String originalName = request.getFileName();
+                            String originalExt = originalName.substring(originalName.lastIndexOf("."));
+                            String tempName = request.getFileName().replace(originalExt,".tmp");
+                            File file = new File(request.getFilePath(), tempName);
                             BufferedSink sink = null;
                             DownloadListener listener = request.getListener();
                             String taskId = call.request().tag().toString();
                             try {
                                 sink = Okio.buffer(Okio.sink(file));
                                 sink.writeAll(Okio.source(bufferedSource.inputStream()));
+
+                                if(file.exists()){
+                                    File toMove = new File(request.getFilePath(),request.getFileName());
+                                    boolean moved = file.renameTo(toMove);
+                                    if(moved){
+                                        request.getListener().onComplete(id);
+                                    }
+                                }
                             } catch (FileNotFoundException e) {
                                 handleIOException(listener, taskId, e);
                             } catch (IOException e) {
@@ -206,7 +219,10 @@ public class ManagerService extends Service {
                 @Override
                 public void run() {
                     final Request request = task.getDownloaderRequest();
-                    final File file = new File(request.getFilePath(), request.getFileName());
+                    String originalName = request.getFileName();
+                    String originalExt = originalName.substring(originalName.lastIndexOf("."));
+                    String tempName = request.getFileName().replace(originalExt,".tmp");
+                    final File file = new File(request.getFilePath(), tempName);
                     okhttp3.Request okRequest = task.getOkRequest().newBuilder()
                             .header("Range", "bytes=" + file.length() + "-")
                             .build();
@@ -230,6 +246,13 @@ public class ManagerService extends Service {
                             try {
                                 sink = Okio.buffer(Okio.appendingSink(file));
                                 sink.writeAll(Okio.source(responseBody.byteStream()));
+                                if(file.exists()){
+                                    File toMove = new File(request.getFilePath(),request.getFileName());
+                                    boolean moved = file.renameTo(toMove);
+                                    if(moved){
+                                        request.getListener().onComplete(id);
+                                    }
+                                }
                             } catch (FileNotFoundException e) {
                                 handleIOException(request.getListener(), id, e);
                             } catch (IOException e) {

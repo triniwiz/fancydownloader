@@ -11,6 +11,8 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.io.File;
+import java.sql.Timestamp;
+import java.time.Instant;
 
 import co.fitcom.fancydownloader.DownloadListener;
 import co.fitcom.fancydownloader.DownloadListenerUI;
@@ -41,7 +43,6 @@ public class MainActivity extends AppCompatActivity {
         fileProgressBar.setMax(100);
         final TextView fileTextView = (TextView) findViewById(R.id.fileTextProgress);
         final Request request = new Request(LARGE_IMAGE);
-
         request.setListener(new DownloadListener() {
             @Override
             public void onComplete(String task) {

@@ -1,3 +1,9 @@
+/*
+ * Created By Osei Fortune on 15/17/17 3:30 AM
+ * Copyright (c) 2017 - 2018
+ * Last modified 2/28/18 11:40 AM
+ */
+
 package co.fitcom.fancydownloader;
 
 import android.content.ComponentName;
@@ -6,13 +12,6 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 
-import java.util.Map;
-
-import okhttp3.OkHttpClient;
-
-/**
- * Created by triniwiz on 12/12/17.
- */
 
 
 public class Manager {
