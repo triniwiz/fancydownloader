@@ -13,13 +13,12 @@ public class Request {
     private HashMap<String, String> headers = new HashMap<>();
     private String url;
     private DownloadListener listener;
-
     public Request(String url) {
         this.url = url;
     }
-
     private String fileName;
     private String filePath;
+    private int timeout = 60;
 
     public Request(String url, HashMap<String, String> headers) {
         this.url = url;
@@ -30,6 +29,14 @@ public class Request {
         this.url = url;
         this.headers = headers;
         this.listener = listener;
+    }
+
+    public void setTimeout(int timeout){
+        this.timeout = timeout;
+    }
+
+    public int getTimeout(){
+        return this.timeout;
     }
 
     public void addHeader(String key, String value) {

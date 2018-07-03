@@ -13,6 +13,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.webkit.URLUtil;
 
 import java.io.File;
@@ -23,6 +24,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.*;
 
@@ -34,10 +36,9 @@ public class ManagerService extends Service {
     private Map<String, Task> tasks;
     private final IBinder mBinder = new ManagerBinder();
     private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
-    private OkHttpClient client = new OkHttpClient();
     private Handler mHandler;
     private HandlerThread mThread;
-
+    private static long mTimeout;
     class ManagerBinder extends Binder {
         ManagerService getService() {
             return ManagerService.this;
@@ -63,7 +64,11 @@ public class ManagerService extends Service {
         return mBinder;
     }
 
-    public String create(Request request) {
+    public static void setTimeout(long timeout){
+        mTimeout = timeout;
+    }
+
+    public String create(final Request request) {
         String id = this.generateId();
         okhttp3.Request.Builder builder = new okhttp3.Request.Builder();
         builder.tag(id);
@@ -84,7 +89,28 @@ public class ManagerService extends Service {
         }
         okhttp3.Request dRequest = builder
                 .build();
-        Call call = client.newCall(dRequest);
+        OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder();
+        clientBuilder.connectTimeout(mTimeout, TimeUnit.SECONDS);
+        clientBuilder.readTimeout(mTimeout,TimeUnit.SECONDS);
+        clientBuilder.writeTimeout(mTimeout,TimeUnit.SECONDS);
+        clientBuilder.authenticator(new Authenticator() {
+            @Nullable
+            @Override
+            public okhttp3.Request authenticate(Route route, Response response) throws IOException {
+                if(request.getHeaders().get("Authorization") == null){
+                    return null;
+                }
+                if (response.request().header("Authorization") != null) {
+                    return null;
+                }
+
+                return response.request().newBuilder()
+                        .header("Authorization", request.getHeaders().get("Authorization"))
+                        .build();
+
+            }
+        });
+        Call call = clientBuilder.build().newCall(dRequest);
         this.tasks.put(id, new Task(dRequest, request, call));
 
         return id;
@@ -174,20 +200,12 @@ public class ManagerService extends Service {
 
     private void cancel(String id, Boolean delete) {
         Task task = tasks.get(id);
-        if (task != null) {
-            if (task.getCall().isExecuted()) {
-                task.getCall().cancel();
-            }
-            if (delete) {
-                tasks.remove(id);
-            }
-        } else {
-            for (Call call : client.dispatcher().runningCalls()) {
-                if (call.request().tag().equals(id)) {
-                    call.cancel();
-                    break;
-                }
-            }
+        Call call = task.getCall();
+        if (call != null && !call.isCanceled() && call.isExecuted()) {
+            call.cancel();
+        }
+        if (delete) {
+            tasks.remove(id);
         }
     }
 
@@ -196,8 +214,12 @@ public class ManagerService extends Service {
     }
 
     public void cancelAll() {
-        client.dispatcher().cancelAll();
         for (String key : tasks.keySet()) {
+            Task task = tasks.get(key);
+            Call call = task.getCall();
+            if(call != null && !call.isCanceled() && call.isExecuted()){
+                call.cancel();
+            }
             tasks.remove(key);
         }
     }
@@ -207,8 +229,12 @@ public class ManagerService extends Service {
     }
 
     public void pauseAll() {
-        if (client != null) {
-            client.dispatcher().cancelAll();
+        for (String key : tasks.keySet()) {
+            Task task = tasks.get(key);
+            Call call = task.getCall();
+            if(call != null && !call.isCanceled() && call.isExecuted()){
+                call.cancel();
+            }
         }
     }
 
@@ -227,7 +253,28 @@ public class ManagerService extends Service {
                             .header("Range", "bytes=" + file.length() + "-")
                             .build();
                     task.setOkRequest(okRequest);
-                    final Call call = client.newCall(okRequest);
+                    OkHttpClient.Builder builder = new OkHttpClient.Builder();
+                    builder.connectTimeout(mTimeout, TimeUnit.SECONDS);
+                    builder.readTimeout(mTimeout,TimeUnit.SECONDS);
+                    builder.writeTimeout(mTimeout,TimeUnit.SECONDS);
+                    builder.authenticator(new Authenticator() {
+                        @Nullable
+                        @Override
+                        public okhttp3.Request authenticate(Route route, Response response) throws IOException {
+                            if(request.getHeaders().get("Authorization") == null){
+                                return null;
+                            }
+                            if (response.request().header("Authorization") != null) {
+                                return null;
+                            }
+
+                            return response.request().newBuilder()
+                                    .header("Authorization", request.getHeaders().get("Authorization"))
+                                    .build();
+
+                        }
+                    });
+                    final Call call = builder.build().newCall(okRequest);
                     task.setCall(call);
                     tasks.put(id, new Task(okRequest, request, call));
                     call.enqueue(new Callback() {
