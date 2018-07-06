@@ -3,7 +3,7 @@ apply plugin: 'com.novoda.bintray-release'
 ext {
     PUBLISH_GROUP_ID = 'co.fitcom'
     PUBLISH_ARTIFACT_ID = 'fancydownloader'
-    PUBLISH_VERSION = '0.6.0'
+    PUBLISH_VERSION = '0.6.1'
 }
 
 android {
@@ -50,7 +50,7 @@ publish {
     userOrg = 'triniwiz'
     groupId = 'co.fitcom'
     artifactId = 'fancydownloader'
-    publishVersion = '0.6.0'
+    publishVersion = '0.6.1'
     desc = ''
     website = ''
 }

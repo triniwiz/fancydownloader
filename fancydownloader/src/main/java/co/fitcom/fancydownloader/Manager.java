@@ -45,6 +45,10 @@ public class Manager {
         return mManager;
     }
 
+    public static void setTimeout(long timeout){
+        ManagerService.setTimeout(timeout);
+    }
+
     public void cleanUp() {
         mService.cleanUp();
     }
