@@ -124,6 +124,7 @@ public class ManagerService extends Service {
                 public void run() {
                     final Request request = task.getDownloaderRequest();
                     final Call call = task.getCall();
+                    if(call.isExecuted()) return;
                     call.enqueue(new Callback() {
                         @Override
                         public void onFailure(@NonNull Call call, @NonNull IOException e) {
