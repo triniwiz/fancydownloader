@@ -6,6 +6,8 @@
 
 package co.fitcom.fancydownloader;
 
+import android.net.Uri;
+
 import java.util.HashMap;
 
 
@@ -13,9 +15,11 @@ public class Request {
     private HashMap<String, String> headers = new HashMap<>();
     private String url;
     private DownloadListener listener;
+
     public Request(String url) {
         this.url = url;
     }
+
     private String fileName;
     private String filePath;
     private int timeout = 60;
@@ -31,11 +35,11 @@ public class Request {
         this.listener = listener;
     }
 
-    public void setTimeout(int timeout){
+    public void setTimeout(int timeout) {
         this.timeout = timeout;
     }
 
-    public int getTimeout(){
+    public int getTimeout() {
         return this.timeout;
     }
 
@@ -60,7 +64,7 @@ public class Request {
     }
 
     public void setFilePath(String path) {
-        this.filePath = path;
+        this.filePath = Uri.parse(path).getPath();
     }
 
     public String getFileName() {
