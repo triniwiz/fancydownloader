@@ -28,4 +28,6 @@ public abstract class DownloadListener implements DownloadCallback {
 
    public void onComplete(String task){}
    public void onError(String task, Exception e){};
+    public void onIOError(String task, Exception e){};
+    public void onHttpError(String task, int statusCode, String responseBody){}; // or BufferSource instead of String
 }
