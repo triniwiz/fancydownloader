@@ -120,5 +120,7 @@ public abstract class DownloadListenerUI extends DownloadListener {
     public abstract void onUIComplete(String task);
 
     public abstract void onUIError(String task, Exception e);
+     public void onIOError(String task, Exception e){};
+    public void onHttpError(String task, int statusCode, String responseBody){}; // or BufferSource instead of String
 
 }
