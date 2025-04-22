@@ -47,11 +47,11 @@ if (upload2maven) {
   //  apply from: 'android-release-aar.gradle'
 }
 
-publish {
-    userOrg = 'triniwiz'
-    groupId = 'co.fitcom'
-    artifactId = 'fancydownloader'
-    publishVersion = '0.6.3'
-    desc = ''
-    website = ''
-}
+// publish {
+//     userOrg = 'triniwiz'
+//     groupId = 'co.fitcom'
+//     artifactId = 'fancydownloader'
+//     publishVersion = '0.6.3'
+//     desc = ''
+//     website = ''
+// }
