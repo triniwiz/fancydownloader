@@ -135,23 +135,33 @@ public class ManagerService extends Service {
 
                         @Override
                         public void onResponse(@NonNull Call call, @NonNull final Response response) {
+                            DownloadListener listener = request.getListener();
+                            String taskId = call.request().tag().toString();
+                            if (!response.isSuccessful()) {
+                                //Handle error
+                                handleIOException(listener, taskId, new IOException());
+                            } else {
+                                //Handle success
                             ResponseBody responseBody = new DownloadResponseBody(id, response.headers(), response.body(), request.getListener());
                             BufferedSource bufferedSource = responseBody.source();
                             String originalName = request.getFileName();
                             String originalExt = originalName.substring(originalName.lastIndexOf("."));
-                            String tempName = request.getFileName().replace(originalExt,".tmp");
+                            String tempName = request.getFileName().replace(originalExt, ".tmp");
                             File file = new File(request.getFilePath(), tempName);
                             BufferedSink sink = null;
-                            DownloadListener listener = request.getListener();
-                            String taskId = call.request().tag().toString();
+
+
+
+
+
                             try {
                                 sink = Okio.buffer(Okio.sink(file));
                                 sink.writeAll(Okio.source(bufferedSource.inputStream()));
 
-                                if(file.exists()){
-                                    File toMove = new File(request.getFilePath(),request.getFileName());
+                                if (file.exists()) {
+                                    File toMove = new File(request.getFilePath(), request.getFileName());
                                     boolean moved = file.renameTo(toMove);
-                                    if(moved){
+                                    if (moved) {
                                         request.getListener().onComplete(id);
                                     }
                                 }
@@ -176,6 +186,7 @@ public class ManagerService extends Service {
                                 }
                                 responseBody.close();
                             }
+                        }
                         }
                     });
                 }
